@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+<head>
+    <title>bookmark</title>
+    <meta charset="utf-8"/>
+    <script src="jquery.js"></script>
+    <script src="script.js"></script>
+    <style>
+       @font-face{
+        font-family:'FontAwesome';
+        src:url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.eot?v=3.0.1');
+        src:url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.eot?#iefix&v=3.0.1') format('embedded-opentype'),
+        url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.woff?v=3.0.1') format('woff'),
+        url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
+        font-weight:normal;
+        font-style:normal } 
+        i{display:none;}
+        body{  width:300px; margin-bottom:-4px; }
+        *:before{ font-family:FontAwesome;  text-decoration: inherit;}
+        ul{  padding-left: 0px;    list-style-type: none;  }
+        #list ul{ padding-left: 12px; } 
+        li{ position: relative; cursor: pointer; }
+        li>div{ line-height:24px; height:24px; overflow: hidden;    }
+        li:hover>div{ background: #f9f9f9; height: auto; padding-right: 30px;  }
+        li button{   display:none;  }
+        li:hover>button{  display:inline-block;    }
+        li:before{content: "　"; float:left; margin:6px 6px; }
+        li.file{ color:rgb(17, 85, 204);  }
+        li.folder{ overflow: hidden; } 
+        li.file:before{ content: "\f02b"; }
+        button.del:before{ content: "\f057"; }
+        li.folder:before{  content: "\f07b";  }
+        button.add:before{  content: "\f067";  }
+        button{ position:absolute; top:0px; right:0px;  } 
+        #tool{   position: relative;  }
+        #tool span{ color:#fff; }
+    </style>
+</head>
+<body>   
+    <div id="tool">
+        <a>OneDrive:</a>
+        <span>XXX</span> 
+        <i>[注销]</i>
+        <button class="add"></button> 
+        <ul id="list"> </ul>  
+    </div>
+</body>
+</html>
