@@ -1,20 +1,22 @@
 //_exlog("pageload");   
 $(function(){  
     var $ul = $('#list').html('正在登陆,请不要关闭窗口...'); 
-    _exLoginLive(function(data,user){  
+    _exLoginLive(function(data,user){    
         $('#tool>span').html(user.name); 
         success($ul,data);  
     });    
 });  
-window.onerror=function(e){ 
-    chrome.extension.getBackgroundPage().log(str);
+window.onerror=function(e){  
+    _exlog(e);
 };
 
-function _exlog(str){ 
-    chrome.extension.getBackgroundPage().log(str);
+function _exlog(str){  
+    chrome.extension.sendMessage({"write":str}); 
 }
-function _exLoginLive(cb){ 
-    chrome.extension.getBackgroundPage().oauth.getToken(cb,$);
+function _exLoginLive(cb){   
+    chrome.extension.sendMessage({"login":"true"},function(data){
+        cb(data[0],data[1]);
+    }); 
 } 
 
 function success($ul,data){
@@ -43,7 +45,7 @@ function success($ul,data){
         var src = $(this).data('folder'); 
         var $u = $(this).find('+ul');
         if($u.html()) return $u.html("");
-        $u.html('加载中...'); 
+        $('<li>加载中...</li>').attr('style','opacity:0.3').appendTo($u);
         d.goto(src,function(list){  
             render($u,list,d);  
         });
@@ -51,12 +53,13 @@ function success($ul,data){
     }) 
     .on('click','[data-add]',function(){ 
         var src = $(this).data('add');
-        var $u = $(this).parent().find('>ul');
-        chrome.tabs.getSelected(function(tabs){
-            var url = tabs.url; 
-            var title = window.prompt("添加新书签："+url,tabs.title);
+        var $u = $(this).parent().find('>ul');  
+        chrome.tabs.query( {'active':true,'lastFocusedWindow': true}, function(tabs) {
+        //chrome.tabs.getSelected(function(tabs){    
+            var url = tabs[0].url; 
+            var title = tabs[0].title;//window.prompt("添加新书签："+url,tabs.title);//EdgeEX不支持 
             if(title) {
-                $('<li>加载中...</li>').attr('style','opacity:0.3').appendTo($u);; 
+                $('<li>加载中...</li>').attr('style','opacity:0.3').appendTo($u);
                 d.add(src,title,url,function(){   
                     d.goto(src,function(list){  
                         render($u,list,d);  
@@ -66,7 +69,7 @@ function success($ul,data){
         });  
         return false;
     })
-    .on('click','[data-del]',function(){
+    .on('click','[data-del]',function(){ 
         var $this = $(this).parent().attr('style','opacity:0.3');
         var src = $(this).data('del'); 
         d.del(src,function(data,dir){  

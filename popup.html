@@ -15,22 +15,23 @@
         font-weight:normal;
         font-style:normal } 
         i{display:none;}
-        body{  width:300px; margin-bottom:-4px; }
-        *:before{ font-family:FontAwesome;  text-decoration: inherit;}
+        body{ font-family: "微软雅黑"; width:300px; margin-bottom:-4px; font-size:12px; }
+        *:before{ font-family:FontAwesome "微软雅黑";  text-decoration: inherit; }
+        button{ border:none; background:none; cursor: pointer;}
         ul{  padding-left: 0px;    list-style-type: none;  }
         #list ul{ padding-left: 12px; } 
         li{ position: relative; cursor: pointer; }
-        li>div{ line-height:24px; height:24px; overflow: hidden;    }
+        li>div{ line-height:28px; height:28px; overflow: hidden;    }
         li:hover>div{ background: #f9f9f9; height: auto; padding-right: 30px;  }
         li button{   display:none;  }
         li:hover>button{  display:inline-block;    }
-        li:before{content: "　"; float:left; margin:6px 6px; }
+        li:before{content: "　"; float:left; margin:5px; }
         li.file{ color:rgb(17, 85, 204);  }
         li.folder{ overflow: hidden; } 
-        li.file:before{ content: "\f02b"; }
-        button.del:before{ content: "\f057"; }
-        li.folder:before{  content: "\f07b";  }
-        button.add:before{  content: "\f067";  }
+        li.file:before{ content:  "📋"; /*"\f02b";*/ }
+        button.del:before{ content:"❌";/* "\f057";*/ }
+        li.folder:before{  content: "📁"; /*"\f07b";*/  }
+        button.add:before{  content:"✏"; /*"\f067";*/  }
         button{ position:absolute; top:0px; right:0px;  } 
         #tool{   position: relative;  }
         #tool span{ color:#fff; }
