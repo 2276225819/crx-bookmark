@@ -3,9 +3,10 @@
 <head>
     <title>bookmark</title>
     <meta charset="utf-8"/>
-    <script src="jquery.js"></script>
-    <script src="script.js"></script>
-    <style>
+    <script src="edge/contentScriptsAPIBridge.js"></script>
+    <script src="lib/jquery.js"></script>
+    <script src="popup.js"></script>
+    <style>/*
        @font-face{
         font-family:'FontAwesome';
         src:url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.eot?v=3.0.1');
@@ -13,10 +14,10 @@
         url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.woff?v=3.0.1') format('woff'),
         url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
         font-weight:normal;
-        font-style:normal } 
+        font-style:normal } */
         i{display:none;}
         body{ font-family: "微软雅黑"; width:300px; margin-bottom:-4px; font-size:12px; }
-        *:before{ font-family:FontAwesome "微软雅黑";  text-decoration: inherit; }
+        *:before{ font-family: "微软雅黑";  text-decoration: inherit; }
         button{ border:none; background:none; cursor: pointer;}
         ul{  padding-left: 0px;    list-style-type: none;  }
         #list ul{ padding-left: 12px; } 
@@ -31,7 +32,7 @@
         li.file:before{ content:  "📋"; /*"\f02b";*/ }
         button.del:before{ content:"❌";/* "\f057";*/ }
         li.folder:before{  content: "📁"; /*"\f07b";*/  }
-        button.add:before{  content:"✏"; /*"\f067";*/  }
+        button.add:before{  content:"📝"; /*"\f067";*/  }
         button{ position:absolute; top:0px; right:0px;  } 
         #tool{   position: relative;  }
         #tool span{ color:#fff; }

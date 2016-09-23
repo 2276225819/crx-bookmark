@@ -17,7 +17,7 @@
     ],
     "version": "1.0",
     "-ms-preload": {
-        "backgroundScript": "backgroundScriptsAPIBridge.js",
-        "contentScript": "contentScriptsAPIBridge.js"
+        "backgroundScript": "edge/backgroundScriptsAPIBridge.js",
+        "contentScript": "edge/contentScriptsAPIBridge.js"
     }
 }

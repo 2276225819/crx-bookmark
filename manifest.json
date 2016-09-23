@@ -11,13 +11,7 @@
     "manifest_version": 2,
     "name": "bookmark",
     "permissions": [
-        "tabs",
-        "http://*/*",
-        "https://*/*"
+        "tabs",  "http://*/*",  "https://*/*"
     ],
-    "version": "1.0",
-    "-ms-preload": {
-        "backgroundScript": "backgroundScriptsAPIBridge.js",
-        "contentScript": "contentScriptsAPIBridge.js"
-    }
+    "version": "1.0" 
 }

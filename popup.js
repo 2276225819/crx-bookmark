@@ -1,4 +1,4 @@
-//_exlog("pageload");   
+//_exlog("pageload");   edge/contentScriptsAPIBridge.js
 $(function(){  
     var $ul = $('#list').html('正在登陆,请不要关闭窗口...'); 
     _exLoginLive(function(data,user){    
