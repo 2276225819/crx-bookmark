@@ -4,7 +4,7 @@ var oauth = new OAuth({
     //'redirect_url':'https://www.getpostman.com/oauth2/callback',//使用服务器预设
     'appid':'5488e2a9-2c68-4185-9b04-b5218dcad5c1',
     'secret':'B6vPLrYY2xZ6qhzqpCdhnH2',
-    'scope':'wl.skydrive wl.skydrive_update ', 
+    'scope':'wl.skydrive wl.skydrive_update wl.signin wl.basic', 
 });    
 chrome.extension.onMessage.addListener(function(args, sender, sendResponse) {
     if(args.write)console.log(args.write);

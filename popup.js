@@ -2,6 +2,7 @@
 $(function(){  
     var $ul = $('#list').html('正在登陆,请不要关闭窗口...'); 
     _exLoginLive(function(data,user){    
+        console.log(user); 
         $('#tool>span').html(user.name); 
         success($ul,data);  
     });    
@@ -37,7 +38,7 @@ function success($ul,data){
         delete localStorage['code'] ;
     })
     .on('click','[data-file]',function(){
-        var src = $(this).data('file');
+        var src = $(this).data('file');  
         chrome.tabs.create({url:src,selected:true});
         return false;
     })

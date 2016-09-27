@@ -4,14 +4,28 @@
         "page": "background.html",
         "persistent": true
     },
+    "icons": { 
+        "16": "icon.png",
+        "24": "icon.png",
+        "32": "icon.png",
+        "64": "icon.png"
+    },
     "browser_action": {
+        "default_icon": { 
+            "16": "icon.png",
+            "24": "icon.png",
+            "32": "icon.png",
+            "64": "icon.png"
+        },
         "default_title": "bookmark",
         "default_popup": "popup.html"
     },
     "manifest_version": 2,
     "name": "bookmark",
     "permissions": [
-        "tabs",  "http://*/*",  "https://*/*"
+        "tabs",
+        "http://*/*",
+        "https://*/*"
     ],
     "version": "1.0" 
 }
