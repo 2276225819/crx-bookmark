@@ -52,11 +52,18 @@ function success($ul,data){
         });
         return false; 
     }) 
-    .on('click','[data-add]',function(){ 
+    .on('click','[data-add]',function(){  
         var src = $(this).data('add');
         var $u = $(this).parent().find('>ul');  
-        chrome.tabs.query( {'active':true,'lastFocusedWindow': true}, function(tabs) {
-        //chrome.tabs.getSelected(function(tabs){    
+        chrome.tabs.query( {'active':true,'lastFocusedWindow': true}, function(tabs) { 
+            if( tabs.length)return success(tabs); 
+            chrome.tabs.query( {'active':true }, function(tabs) { 
+                if(tabs.length)return success(tabs); 
+                alert("error");
+                return; 
+            }); 
+        });  
+        function success(tabs){ 
             var url = tabs[0].url; 
             var title = tabs[0].title;//window.prompt("添加新书签："+url,tabs.title);//EdgeEX不支持 
             if(title) {
@@ -66,8 +73,8 @@ function success($ul,data){
                         render($u,list,d);  
                     });
                 });   
-            }
-        });  
+            } 
+        }
         return false;
     })
     .on('click','[data-del]',function(){ 
