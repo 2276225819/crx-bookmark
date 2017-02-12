@@ -1,7 +1,7 @@
 var oauth = new OAuth({
     'auth_url':'https://login.live.com/oauth20_authorize.srf',
     'token_url':'https://login.live.com/oauth20_token.srf',
-    //'redirect_url':'https://www.getpostman.com/oauth2/callback', 
+    //'redirect_url':'https://www.getpostman.com/oauth2/callback',//
     'appid':'5488e2a9-2c68-4185-9b04-b5218dcad5c1',
     'secret':'B6vPLrYY2xZ6qhzqpCdhnH2',
     'scope':'wl.skydrive wl.skydrive_update wl.signin wl.basic', 
@@ -25,7 +25,7 @@ function OAuth(opt){
                 +'?client_id='+opt.appid
                 +'&scope='+opt.scope
                 +'&response_type='+'code'  
-    }; 
+    };
     _this.getToken=function(success){ //function success(auth,user):null  
         var data = JSON.parse(localStorage['data']||'{}'); 
         if(data && data.access_token){
@@ -50,7 +50,7 @@ function OAuth(opt){
                 _this.data = data; 
             },
             error:function(e){  
-                if( e.status == 0 ) return; 
+                if( e.status == 0 ) return; //�Ƿ��������ش��� 
                 setTimeout(function(){
                     getCode('error login '+ e.statusText||e.responseText,success);  
                 },1000);
@@ -79,7 +79,7 @@ function OAuth(opt){
                 _exlog("...success...") ; 
             },
             error:function(e){  
-                if( e.status == 0 ) return;  
+                if( e.status == 0 ) return; 
                 setTimeout(function(){ 
                     delete localStorage['data'] ;
                     getCode( 'expire login '+  e.statusText||e.responseText, success );  
@@ -97,9 +97,7 @@ function _exlog(str){
 }
 chrome.extension.getBackgroundPage().log=function(str){ 
     console.log(str);
-} 
-
- 
+}  
 chrome.extension.getBackgroundPage().openDialog = function(url,title,success){
     _exlog("open1:"+title);
     chrome.windows.create({  url:url, type:'popup',width:400,height:600,top:0 },function(win){   

@@ -5,17 +5,17 @@
         "persistent": true
     },
     "icons": { 
-        "16": "icon.png",
-        "24": "icon.png",
-        "32": "icon.png",
-        "64": "icon.png"
+        "16": "images/icon.png",
+        "24": "images/icon.png",
+        "32": "images/icon.png",
+        "64": "images/icon.png"
     },
     "browser_action": {
         "default_icon": { 
-            "16": "icon.png",
-            "24": "icon.png",
-            "32": "icon.png",
-            "64": "icon.png"
+            "16": "images/icon.png",
+            "24": "images/icon.png",
+            "32": "images/icon.png",
+            "64": "images/icon.png"
         },
         "default_title": "bookmark",
         "default_popup": "popup.html"
