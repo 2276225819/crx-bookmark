@@ -22,15 +22,15 @@
         button{ border:none; background:none; cursor: pointer;}
         ul{  padding-left: 0px;    list-style-type: none;  }
         #list ul{ padding-left: 12px; } 
-        li{ color: #aaa; position: relative; cursor: pointer; }
+        li{position: relative; cursor: pointer; }
         li>div{ line-height:28px; height:28px; overflow: hidden;    }
         li:hover>div{ background: #f9f9f9; height: auto; padding-right: 30px;  }
         li button{   display:none;  }
         li:hover>button{  display:inline-block;    }
         li:before{content: "　"; float:left; margin:5px; }
-        li.file{ color:rgb(17, 85, 204);  }
-		li.black{color: #000;}
-        li.folder{color:#000; overflow: hidden; } 
+        li.file{ color:#228;  }
+        li.folder{color:#114;  overflow: hidden; } 
+		li.load{ color: #aaa; } 
         li.file:before{ content:  "📋"; /*"\f02b";*/ }
         button.del:before{ content:"❌";/* "\f057";*/ }
         li.folder:before{  content: "📁"; /*"\f07b";*/  }

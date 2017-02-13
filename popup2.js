@@ -19,48 +19,55 @@ $(function(){
         var src = $(this).data('file');  
         chrome.tabs.create({url:src,selected:true});
         return false;
-    })
-	.on('mouseover','li.black',function(){
-		var $this = $(this);
-		var url = $this.removeClass('black').attr('url');
-		getFileInfoAsync(url).then(function(html){  
-            var $del = $('<button class="del" title="删除书签"></button>').prependTo($this)
-			$del.attr('data-del',url); 
-			$this.attr('class','file').removeAttr('url')
-				.find('>div') .attr('data-file', html );  
-		}); 
-		return false;
-	})	
+    }) 
     .on('click','[folder]',function(){ 
-        var url = $(this).attr('folder'); 
-        var $u = $(this).find('+ul');
-        if($u.html()) return $u.html("");
-        $('<li>加载中...</li>').attr('style','opacity:0.3').appendTo($u);
-		getFilesAsync(url).then(function(list){
-            render($u,list);  
-		});
         return false; 
     }) 
 });
 
 function render($ul,data){  
     $ul.empty();
-    for(var k in data) with({ item:data[k], $li:$('<li></li>').appendTo($ul)   }) {   
+	$.each(data,function(i,item){
+		var $li = $('<li></li>').appendTo($ul) ; 
         if(item.type=='folder'){ 
             $li.attr('class',item.type).append('<ul></ul>'); 
             $('<div>'+item.name+'</div>').prependTo($li)
                 .attr('folder',item.upload_location);
             $('<button class="add" title="添加新书签"></button>').prependTo($li)
                 .attr('data-add',item.upload_location); 
+			$li.click(function(){ 
+				var $u = $(this).addClass('load').find('+ul');
+				if($u.html()) return $u.html("");
+				$('<li>加载中...</li>').addClass('load').appendTo($u);
+				getFilesAsync(item.upload_location).then(function(list){
+					render($u,list);  
+				}); 
+			});
         }      
         if(item.type=='file'){ 
             var name = item.name.replace(/\.url$/,'');
-            $li.attr('url',item.upload_location)
-				.attr('class','black')
+            $li.attr('url',item.upload_location) 
 				.append('<div>'+ name +'</div>');
-			 
+			getCacheAsync(item.upload_location).then(function(html){
+				return html || new Promise(function(next,err){
+					$li.one('mouseover',function(){
+						$li.addClass('load');
+						next();
+					}).then(function(){
+						return getFileInfoAsync(item.upload_location)
+					}).then(function(html){ 
+						$li.removeClass('load');
+						return html;
+					});
+				})
+			}).then(function(html){
+				var $del = $('<button class="del" title="删除书签"></button>').prependTo($li)
+				$del.attr('data-del',item.upload_location); 
+				$li.attr('class','file').removeAttr('url')
+					.find('>div') .attr('data-file', html );  
+			});
         } 
-    } 
+    });
 } 
  
 function autoCache(name,fn){
@@ -70,7 +77,7 @@ function autoCache(name,fn){
 		})
 	}).catch(function(e){
 		localStorage['token']='';
-		console.log(e.stack);
+		alert(e.stack ||e.status);
 	})
 }
 function getCacheAsync(name){
@@ -80,7 +87,7 @@ function getCacheAsync(name){
 			var str = localStorage[name];
 			next(str && JSON.parse(str)); 
 		}else{
-			err("");
+			err("!!getCacheAsync!!");
 		}
 	}) 
 }
@@ -91,7 +98,7 @@ function setCacheAsync(name,val){
 			if(val)localStorage[name] = JSON.stringify(val);
 			next(val); 
 		}else{
-			err("");
+			err("!!setCacheAsync!!");
 		}
 	}) 
 }
