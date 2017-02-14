@@ -11,60 +11,73 @@ $(function(){
 		console.log(error);
 	}); 
 
-	$(document)
-    .on('click','#tool>a',function(){
+	$(document) .on('click','#tool>a',function(){
         chrome.tabs.create({url:'https://onedrive.live.com/',selected:true}); 
-    })
-    .on('click','[data-file]',function(){
-        var src = $(this).data('file');  
-        chrome.tabs.create({url:src,selected:true});
-        return false;
-    }) 
-    .on('click','[folder]',function(){ 
-        return false; 
-    }) 
+    });
 });
 
-function render($ul,data){  
-    $ul.empty();
+function render($parent,data){  
+    $parent.empty();
 	$.each(data,function(i,item){
-		var $li = $('<li></li>').appendTo($ul) ; 
+		var $li = $('<li></li>').appendTo($parent) ; 
         if(item.type=='folder'){ 
-            $li.attr('class',item.type).append('<ul></ul>'); 
-            $('<div>'+item.name+'</div>').prependTo($li)
-                .attr('folder',item.upload_location);
-            $('<button class="add" title="添加新书签"></button>').prependTo($li)
-                .attr('data-add',item.upload_location); 
-			$li.click(function(){ 
-				var $u = $(this).addClass('load').find('+ul');
-				if($u.html()) return $u.html("");
-				$('<li>加载中...</li>').addClass('load').appendTo($u);
-				getFilesAsync(item.upload_location).then(function(list){
-					render($u,list);  
-				}); 
+			$li.attr('class','folder');
+            var $ul = $('<ul>').appendTo($li); 
+            var $title = $('<div>'+item.name+'</div>')
+				.prependTo($li) 
+            var $new = $('<button class="add" title="添加新书签"></button>')
+				.prependTo($li) 
+			$new.click(function(){ 
+				queryTableAsync().then(function(obj){
+					$li.addClass('load');
+					$ul.html('<li>加载中...</li>')
+					return setFileAsync(item.upload_location,obj.title,obj.url); 
+				}).then(function(){
+					return getFileListAsync(item.upload_location) 
+				}).then(function(list){
+					$li.removeClass('load');
+					render($ul,list);  
+				});
 			});
+			$title.one('click',function(){  
+				if($ul.html()) return $ul.html("");
+				$li.addClass('load');
+				$('<li>加载中...</li>').appendTo($ul);
+				getFileListAsync(item.upload_location).then(function(list){
+					$li.removeClass('load');
+					render($ul,list);  
+				}); 
+			}).click(function(){
+				$ul.toggleClass('show');
+			})
         }      
         if(item.type=='file'){ 
             var name = item.name.replace(/\.url$/,'');
-            $li.attr('url',item.upload_location) 
-				.append('<div>'+ name +'</div>');
+            var $title = $('<div>'+item.name+'</div>')
+				.prependTo($li)  
+			var $del = $('<button class="del" title="删除书签"></button>')
+				.prependTo($li);
 			getCacheAsync(item.upload_location).then(function(html){
 				return html || new Promise(function(next,err){
 					$li.one('mouseover',function(){
 						$li.addClass('load');
 						next();
-					}).then(function(){
-						return getFileInfoAsync(item.upload_location)
-					}).then(function(html){ 
-						$li.removeClass('load');
-						return html;
 					});
-				})
+				}).then(function(){
+					return getFileAsync(item.upload_location)
+				}).then(function(html){ 
+					$li.removeClass('load');
+					return html;
+				});
 			}).then(function(html){
-				var $del = $('<button class="del" title="删除书签"></button>').prependTo($li)
-				$del.attr('data-del',item.upload_location); 
-				$li.attr('class','file').removeAttr('url')
-					.find('>div') .attr('data-file', html );  
+				$li.attr('class','file');
+				$del.click(function(){
+
+				});
+				$title.click(function(){
+					var src = $(this).data('file');  
+					chrome.tabs.create({url:src,selected:true}); 
+				}) 
 			});
         } 
     });
@@ -95,7 +108,7 @@ function setCacheAsync(name,val){
 	var global = this;//(0,eval)('this');
 	return new Promise(function(next,err){
 		if(global.localStorage){
-			if(val)localStorage[name] = JSON.stringify(val);
+			localStorage[name] = val?JSON.stringify(val):val;
 			next(val); 
 		}else{
 			err("!!setCacheAsync!!");
@@ -147,6 +160,23 @@ function loginAsync(){
 	// 	} 
 	// }) 
 } 
+function queryTableAsync(){ 
+	return new Promise(function(next){
+		chrome.tabs.query( {'active':true,'lastFocusedWindow': true}, function(tabs){
+			if(tabs && tabs[0] && tabs[0].title)
+				next(tabs[0]);
+		});  
+		chrome.tabs.query( {'active':true}, function(tabs){
+			if(tabs && tabs[0] && tabs[0].title)
+				next(tabs[0]);
+		});   
+	}).then(function(tab){
+		return ({
+			url:tab.url,
+			title:tab.title//window.prompt("添加新书签："+url,tabs.title);//EdgeEX不支持 
+		}); 
+	});
+}
 function createTokenAsync(code){
 	var url = 'https://login.live.com/oauth20_token.srf';
 	var appid = '5488e2a9-2c68-4185-9b04-b5218dcad5c1';
@@ -171,13 +201,28 @@ function createTokenAsync(code){
 }
 function loadUserAsync(token){ 
 	return new Promise(function(next,error){
- 		$.ajax('https://apis.live.net/v5.0/me?access_token='+token).then( function(user){
-				next(user); 
-        }, error); 
+ 		$.ajax('https://apis.live.net/v5.0/me?access_token='+token).then(next,error); 
 	});
 }
-function saveFileAsync(){
-
+function saveFileAsync(token,upload_location,name,url){ 
+	var file = name+'.url'; 
+	[/\\\\/g, /\//g, /:/g, /;/g, /\*/g, /</g, />/g, /\|/g, /\?/g].forEach(function(v){
+		file = file.replace(v,'');
+	}); 
+	var text = 'URL='+url; 
+	return $.ajax({
+		url: upload_location +'?access_token='+ token,
+		type:'POST',
+		contentType : 'multipart/form-data; boundary=EEEEEEEEEEEEEEEEEEEE',
+		processData : false,  
+		data:'--EEEEEEEEEEEEEEEEEEEE\r\nContent-Disposition: form-data; name="file"; filename="'+file
+			+'"\r\nContent-Type: application/octet-stream\r\n\r\n[InternetShortcut]\r\n'+text
+			+'\r\nRoamed=-1\r\n--EEEEEEEEEEEEEEEEEEEE--',
+	}).then(function(data){
+		return setCacheAsync(upload_location,'').then(function(){
+			return data;
+		});
+	});
 }
 function loadFilesAsync(token,upload_location){ 
 	return new Promise(function(next,error){
@@ -235,14 +280,19 @@ function getTokenAsync(){
 		}) 
 	})
 }
-function getFileInfoAsync(upload_location){ 
+function setFileAsync(upload_location,file,url){ 
+	return getTokenAsync().then(function(token){
+		return saveFileAsync(token,upload_location,file,url);
+	})  
+}
+function getFileAsync(upload_location){ 
 	return autoCache(upload_location,function(){
 		return getTokenAsync().then(function(token){
 			return loadContentAsync(token,upload_location);
 		}) 
 	}); 
 }
-function getFilesAsync(upload_location){ 
+function getFileListAsync(upload_location){ 
 	return autoCache(upload_location,function(){
 		return getTokenAsync().then(function(token){
 			return loadFilesAsync(token,upload_location);
