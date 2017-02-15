@@ -3,7 +3,7 @@ $(function(){
 	var $ul = $('#list');  
 	getCacheAsync('skydriver').then(function(arr){
 		if(arr) render($ul,arr);    
-		else getFavoritesAsync().then(function(arr){
+		else loadFavoritesAsync().then(function(arr){
 			setCacheAsync('skydriver',arr); 
 			render($ul,arr);  
 		}); 
@@ -11,9 +11,20 @@ $(function(){
 		console.log(error);
 	}); 
 
-	$(document) .on('click','#tool>a',function(){
+	$(document) 
+	.on('click','#tool>.title',function(){
         chrome.tabs.create({url:'https://onedrive.live.com/',selected:true}); 
-    });
+    })
+	.on('click','#tool>.add',function(){ 
+		if(window.base_url) queryNowTabAsync().then(function(tab){ 
+			$ul.html('<li>加载中...</li>')
+			return addFileAsync(window.base_url,tab.title,tab.url); 
+		}).then(function(){
+			return getFileListAsync(window.base_url) 
+		}).then(function(list){ 
+			render($ul,list);  
+		});
+	})
 });
 
 function render($parent,data){  
@@ -28,15 +39,15 @@ function render($parent,data){
             var $new = $('<button class="add" title="添加新书签"></button>')
 				.prependTo($li) 
 			$new.click(function(){ 
-				queryTableAsync().then(function(obj){
+				queryNowTabAsync().then(function(obj){
 					$li.addClass('load');
 					$ul.html('<li>加载中...</li>')
-					return setFileAsync(item.upload_location,obj.title,obj.url); 
+					return addFileAsync(item.upload_location,obj.title,obj.url); 
 				}).then(function(){
 					return getFileListAsync(item.upload_location) 
 				}).then(function(list){
 					$li.removeClass('load');
-					render($ul,list);  
+					if(list)render($ul,list);  
 				});
 			});
 			$title.one('click',function(){  
@@ -45,7 +56,7 @@ function render($parent,data){
 				$('<li>加载中...</li>').appendTo($ul);
 				getFileListAsync(item.upload_location).then(function(list){
 					$li.removeClass('load');
-					render($ul,list);  
+					if(list)render($ul,list);  
 				}); 
 			}).click(function(){
 				$ul.toggleClass('show');
@@ -72,7 +83,15 @@ function render($parent,data){
 			}).then(function(html){
 				$li.attr('class','file');
 				$del.click(function(){
-
+					$li.addClass('load');
+					delFileAsync(item.upload_location).then(function(){
+						var upload_location = 'https://apis.live.net/v5.0/'+item.parent_id+'/files/';
+						setCacheAsync(upload_location,'');
+						return getFileListAsync(upload_location);
+					}).then(function(list){
+						$li.removeClass('load');
+						if(list)render($parent,list);  
+					});
 				});
 				$title.click(function(){
 					var src = $(this).data('file');  
@@ -88,31 +107,33 @@ function autoCache(name,fn){
 		return data || fn().then(function(data){
 			return setCacheAsync(name,data);
 		})
-	}).catch(function(e){
-		localStorage['token']='';
-		alert(e.stack ||e.status);
-	})
+	}) 
 }
-function getCacheAsync(name){
-	var global = this;// (0,eval)('this');
-	return new Promise(function(next,err){ 
-		if(global.localStorage){
-			var str = localStorage[name];
-			next(str && JSON.parse(str)); 
-		}else{
-			err("!!getCacheAsync!!");
+function getCacheAsync(name){ 
+	return new Promise(function(next,err){  
+		var str;
+		try {
+			str = localStorage[name];
+			next(str && JSON.parse(str));    
+		} catch (error) {
+			delete localStorage[name];
+			console.log([error,name,str]);
+			alert(str);  
+			err(error); 
 		}
 	}) 
 }
-function setCacheAsync(name,val){ 
-	var global = this;//(0,eval)('this');
+function setCacheAsync(name,val){  
 	return new Promise(function(next,err){
-		if(global.localStorage){
-			localStorage[name] = val?JSON.stringify(val):val;
-			next(val); 
-		}else{
-			err("!!setCacheAsync!!");
-		}
+		try {
+			if(val=='') delete localStorage[name];
+			else localStorage[name] = JSON.stringify(val); 
+			next(val);   
+		} catch (error) {
+			console.log([error,name,val]);
+			alert(str);  
+			err(error);
+		} 
 	}) 
 }
 
@@ -160,7 +181,7 @@ function loginAsync(){
 	// 	} 
 	// }) 
 } 
-function queryTableAsync(){ 
+function queryNowTabAsync(){ 
 	return new Promise(function(next){
 		chrome.tabs.query( {'active':true,'lastFocusedWindow': true}, function(tabs){
 			if(tabs && tabs[0] && tabs[0].title)
@@ -191,12 +212,10 @@ function createTokenAsync(code){
                 code:code,  grant_type:'authorization_code'
             },
             contentType:"application/x-www-form-urlencoded",
-            dataType:"json",
-            success: function(data){
-				next(data.access_token); 
-            },
-            error:err
-        });  
+            dataType:"json", 
+        }).then(function(data){
+			next(data.access_token); 
+		},err);
 	})
 }
 function loadUserAsync(token){ 
@@ -204,8 +223,22 @@ function loadUserAsync(token){
  		$.ajax('https://apis.live.net/v5.0/me?access_token='+token).then(next,error); 
 	});
 }
+function removeFileAsync(token,upload_location){
+	upload_location = upload_location.replace(/\/content\/$/,'');
+	return new Promise(function(next,error){ 
+		$.ajax({
+			url: upload_location +'?access_token='+ token,
+			type:'DELETE',
+			success:next,error:error,
+		}) 
+	}).then(function(data){
+		setCacheAsync(upload_location,'');
+		return data;
+	})
+ 
+}
 function saveFileAsync(token,upload_location,name,url){ 
-	var file = name+'.url'; 
+	var file = name +'.url'; 
 	[/\\\\/g, /\//g, /:/g, /;/g, /\*/g, /</g, />/g, /\|/g, /\?/g].forEach(function(v){
 		file = file.replace(v,'');
 	}); 
@@ -219,12 +252,11 @@ function saveFileAsync(token,upload_location,name,url){
 			+'"\r\nContent-Type: application/octet-stream\r\n\r\n[InternetShortcut]\r\n'+text
 			+'\r\nRoamed=-1\r\n--EEEEEEEEEEEEEEEEEEEE--',
 	}).then(function(data){
-		return setCacheAsync(upload_location,'').then(function(){
-			return data;
-		});
+		setCacheAsync(upload_location,'');
+		return data;
 	});
 }
-function loadFilesAsync(token,upload_location){ 
+function loadFileListAsync(token,upload_location){ 
 	return new Promise(function(next,error){
 		$.ajax(upload_location+"?access_token="+token).then(next,error); 
 	}).then(function(json){
@@ -249,14 +281,14 @@ function saveDirAsync(token,base_dir,name){
 		})  
 	})
 }
-function getFavoritesAsync(){   
-	return getTokenAsync().then(function(token){ 
+function loadFavoritesAsync(){   
+	return tryTokenAsync(function(token){
 		return new Promise(function(next,error){
 			var url ="https://apis.live.net/v5.0/me/skydrive?access_token="+ token; 
 			$.ajax(url).then(next,error); 
 		}).then(function(json){
-			var base_url = json.upload_location;
-			return loadFilesAsync(token,base_url) .then(function(files){  
+			var base_url = window.base_url=json.upload_location;
+			return loadFileListAsync(token,base_url).then(function(files){  
 				for(var k in files) with({item:files[k]})
 					if(item.name=='favorites') 
 						return item.upload_location;   
@@ -267,35 +299,44 @@ function getFavoritesAsync(){
 				}); 
 			})
 		}).then(function(favorites_location){
-			return loadFilesAsync(token,favorites_location);
+			return loadFileListAsync(token,favorites_location);
 		})
 	});
 }
 
-
-function getTokenAsync(){ 
+function tryTokenAsync(cb){ 
 	return autoCache('token',function(){
 		return loginAsync().then(function(code){
 			return createTokenAsync(code);
 		}) 
 	})
+	.then(cb)
+	.catch(function(e){ 
+		setCacheAsync('token',''); 
+		alert('token error:'+(e.stack ||e.status)+ e.statusText); 
+	})
+} 
+function addFileAsync(upload_location,file,url){ 
+	return tryTokenAsync(function(token){
+		return saveFileAsync(token,upload_location,file,url); 
+	}); 
 }
-function setFileAsync(upload_location,file,url){ 
-	return getTokenAsync().then(function(token){
-		return saveFileAsync(token,upload_location,file,url);
+function delFileAsync(upload_location){  
+	return tryTokenAsync(function(token){
+		return removeFileAsync(token,upload_location);
 	})  
 }
 function getFileAsync(upload_location){ 
 	return autoCache(upload_location,function(){
-		return getTokenAsync().then(function(token){
+		return tryTokenAsync(function(token){
 			return loadContentAsync(token,upload_location);
 		}) 
 	}); 
 }
 function getFileListAsync(upload_location){ 
 	return autoCache(upload_location,function(){
-		return getTokenAsync().then(function(token){
-			return loadFilesAsync(token,upload_location);
+		return tryTokenAsync(function(token){
+			return loadFileListAsync(token,upload_location);
 		}) 
 	}); 
 }
