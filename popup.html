@@ -17,28 +17,30 @@
         font-weight:normal;
         font-style:normal } */
         i{display:none;}
-        body{ font-family: "微软雅黑"; width:300px; margin-bottom:-4px; font-size:12px; }
+        body{ margin: 0px; font-family: "微软雅黑";   font-size:12px; }
+        .body{    max-height: 500px;  width:300px; overflow: auto; box-sizing: border-box;  padding:5px 10px 10px;  }
         *:before{ font-family: "微软雅黑";  text-decoration: inherit; }
         button{ border:none; background:none; cursor: pointer;}
-        ul{  padding-left: 0px;    list-style-type: none;  }
+        ul{  padding-left: 0px;  margin: 0px;   list-style-type: none;  } 
         #list ul{ padding-left: 12px; } 
         li{position: relative; cursor: pointer; }
         li>div{ line-height:28px; height:28px; overflow: hidden;    }
         li:hover>div{ background: #f9f9f9; height: auto; padding-right: 30px;  }
         li button{   display:none;  }
         li:hover>button{  display:inline-block;    }
+        li.show>button{  display:inline-block;    }
         li:before{content: "　"; float:left; margin:5px; }
         li.file{ color:#228;  }
         li.folder{color:#114;  overflow: hidden; } 
-		li.load{ color: #aaa; } 
+		li.load{ color: #ddd; } 
         li.file:before{ content:  "📋"; /*"\f02b";*/ }
-        li>ul.show{ display: block;}
+        li.show>ul{ display: block;}
         li>ul{display: none}
         button.del:before{ content:"❌";/* "\f057";*/ }
         li.folder:before{  content: "📁"; /*"\f07b";*/  }
         button.add:before{  content:"📝"; /*"\f067";*/  }
         button{ position:absolute; top:0px; right:0px;  } 
-        #tool{   position: relative;  }
+        #tool{ position: relative; margin: 5px 10px 0px; line-height: 26px; box-shadow: 0px 7px 6px -6px #ccc;}
         #tool span{ color:#fff; }
     </style>
 </head>
@@ -48,6 +50,8 @@
         <span>XXX</span> 
         <i>[注销]</i>
         <button class="add"></button> 
+    </div> 
+    <div class="body"> 
         <ul id="list"> </ul>  
     </div>
 </body>
