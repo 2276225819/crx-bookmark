@@ -2,12 +2,11 @@ $(function(){
 	var $ul = $('#list');  
 	var base_url='';   
 	getFavoritesUrlAsync().then(function(favorites_location){
-		return base_url=favorites_location; 
-	}).then(function(favorites_location){
 		base_url=favorites_location;
 		return getFileListAsync(favorites_location) ;
 	}).then(function(arr){ 
 		render($ul,arr);   
+		cAsync('refreshAsync',base_url); 
 	},function(error){ 
 		alert('init error:'+error);
 		console.log(error);
@@ -39,6 +38,8 @@ function render($parent,data){
 				.prependTo($li) 
             var $new = $('<button class="add" title="添加新书签"></button>')
 				.prependTo($li) 
+            // var $dir = $('<button class="dir" title="添加文件夹"></button>')
+			// 	.prependTo($li) 
 			$new.click(function(){ 
 				queryNowTabAsync().then(function(obj){
 					$li.addClass('load');
@@ -51,33 +52,37 @@ function render($parent,data){
 					if(list)render($ul,list);  
 				});
 			});
-			$title.one('click',function(){  
-				if($ul.html()) return $ul.html("");
+			// $dir.click(function(){
+
+			// });
+			$title.one('click',function(){   
 				$li.addClass('load');
 				$('<li>加载中...</li>').appendTo($ul);
 				getFileListAsync(item.upload_location).then(function(list){
 					$li.removeClass('load');
-					if(list)render($ul,list);  
+					if(list) render($ul,list);   
+					cAsync('refreshAsync',item.upload_location); 
 				}); 
 			}).click(function(){
-				$li.toggleClass('show');
+				$li.toggleClass('show');  
 			})
         }      
         if(item.type=='file'){ 
             var name = item.name.replace(/\.url$/,'');
             var $title = $('<div>'+item.name+'</div>')
-				.prependTo($li)  
+				.prependTo($li).attr('title',item.name);
 			var $del = $('<button class="del" title="删除书签"></button>')
 				.prependTo($li);
 			getCacheAsync(item.upload_location).then(function(html){
-				return html || new Promise(function(next,err){
+				/*new Promise(function(next,err){
 					$li.one('mouseover',function(){
 						$li.addClass('load');
 						next();
 					});
 				}).then(function(){
-					return getFileAsync(item.upload_location)
-				}).then(function(html){ 
+					return 
+				})*/
+				return html || getFileAsync(item.upload_location).then(function(html){ 
 					$li.removeClass('load');
 					return html;
 				});
@@ -102,38 +107,35 @@ function render($parent,data){
         } 
     });
 } 
- 
-function chromeCallAsync(arr){ 
+
+function cAsync( __args__ ){ 
+	var arr = [].concat.apply([],arguments); 
+	var $$ = chrome.rumtime || chrome.extension;
 	return new Promise(function(next){ 
 		var k = Date.now();
 		arr.unshift(k);
-		chrome.extension.onMessage.addListener(function T(args){   
-			if(args.id == k){  
-				next(args.data);
-				chrome.extension.onMessage.removeListener(T);
-			}
-		});
-    	chrome.extension.sendMessage(arr);    
+    	$$.sendMessage(arr);  
+		$$.onMessage.addListener(function T(args){   
+			if(args.id != k) return;
+			next(args.data);
+			$$.onMessage.removeListener(T); 
+		});  
 	});
 }
-function getCacheAsync(name){  
-	return chromeCallAsync(['getCacheAsync',name] ); 
-}
-function setCacheAsync(name,val){  
-	return chromeCallAsync(['setCacheAsync',name,val] ); 
-} 
+
+
 function addFileAsync(upload_location,file,url){ 
-	return chromeCallAsync(['addFileAsync',upload_location,file,url] );
+	return cAsync('addFileAsync',upload_location,file,url );
 }
 function delFileAsync(upload_location){  
-	return chromeCallAsync(['delFileAsync',upload_location] );
+	return cAsync('delFileAsync',upload_location );
 }
 function getFileAsync(upload_location){ 
-	return chromeCallAsync(['getFileAsync',upload_location] );
+	return cAsync('getFileAsync',upload_location );
 }
 function getFileListAsync(upload_location){  
-	return chromeCallAsync(['getFileListAsync',upload_location] );
+	return cAsync('getFileListAsync',upload_location );
 }
 function getFavoritesUrlAsync(){  
-	return chromeCallAsync(['getFavoritesUrlAsync']);
+	return cAsync('getFavoritesUrlAsync');
 }
