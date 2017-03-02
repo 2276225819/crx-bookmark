@@ -1,3 +1,4 @@
+/// <reference path="lib/core.js" />
 $(function(){ 
 	var $ul = $('#list');  
 	var base_url='';   
@@ -6,7 +7,7 @@ $(function(){
 		return getFileListAsync(favorites_location) ;
 	}).then(function(arr){ 
 		render($ul,arr);   
-		cAsync('refreshAsync',base_url); 
+		cAsync('back','refreshAsync',base_url); 
 	},function(error){ 
 		alert('init error:'+error);
 		console.log(error);
@@ -24,9 +25,9 @@ $(function(){
 		}).then(function(list){ 
 			render($ul,list);  
 		});
-	})
+	});
 });
-
+ 
 function render($parent,data){  
     $parent.empty();
 	$.each(data,function(i,item){
@@ -61,7 +62,7 @@ function render($parent,data){
 				getFileListAsync(item.upload_location).then(function(list){
 					$li.removeClass('load');
 					if(list) render($ul,list);   
-					cAsync('refreshAsync',item.upload_location); 
+					cAsync('back','refreshAsync',item.upload_location); 
 				}); 
 			}).click(function(){
 				$li.toggleClass('show');  
@@ -108,34 +109,36 @@ function render($parent,data){
     });
 } 
 
-function cAsync( __args__ ){ 
-	var arr = [].concat.apply([],arguments); 
-	var $$ = chrome.rumtime || chrome.extension;
-	return new Promise(function(next){ 
-		var k = Date.now();
-		arr.unshift(k);
-    	$$.sendMessage(arr);  
-		$$.onMessage.addListener(function T(args){   
-			if(args.id != k) return;
-			next(args.data);
-			$$.onMessage.removeListener(T); 
-		});  
-	});
+var cAsync = connect('front');
+// function cAsync( __args__ ){ 
+// 	var arr = [].concat.apply([],arguments); 
+// 	return new Promise(function(next){ 
+// 		var k = Date.now();
+// 		arr.unshift(k);
+//     	$$.sendMessage(arr);  
+// 		$$.onMessage.addListener(function T(args){   
+// 			if(args.id != k) return;
+// 			next(args.data);
+// 			$$.onMessage.removeListener(T); 
+// 		});  
+// 	});
+// }
+
+function htmlcss(s){
+	$('html').attr('style',s);
 }
-
-
 function addFileAsync(upload_location,file,url){ 
-	return cAsync('addFileAsync',upload_location,file,url );
+	return cAsync('back','addFileAsync',upload_location,file,url );
 }
 function delFileAsync(upload_location){  
-	return cAsync('delFileAsync',upload_location );
+	return cAsync('back','delFileAsync',upload_location );
 }
 function getFileAsync(upload_location){ 
-	return cAsync('getFileAsync',upload_location );
+	return cAsync('back','getFileAsync',upload_location );
 }
 function getFileListAsync(upload_location){  
-	return cAsync('getFileListAsync',upload_location );
+	return cAsync('back','getFileListAsync',upload_location );
 }
 function getFavoritesUrlAsync(){  
-	return cAsync('getFavoritesUrlAsync');
-}
+	return cAsync('back','getFavoritesUrlAsync');
+} 
