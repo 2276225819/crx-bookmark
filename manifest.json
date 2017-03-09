@@ -1,5 +1,6 @@
 {
     "author": "dage",
+    "version": "1.0" ,
     "background": {
         "page": "background.html",
         "persistent": true
@@ -26,6 +27,5 @@
         "tabs",
         "http://*/*",
         "https://*/*"
-    ],
-    "version": "1.0" 
+    ] 
 }
