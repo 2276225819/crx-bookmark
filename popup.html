@@ -18,8 +18,7 @@
         url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.woff?v=3.0.1') format('woff'),
         url('http://www.bootcss.com/p/font-awesome/assets/font/fontawesome-webfont.ttf?v=3.0.1') format('truetype');
         font-weight:normal;
-        font-style:normal } */
-        i{display:none;}
+        font-style:normal } */ 
         body{ margin: 6px 0 4px; font-family: "微软雅黑";   font-size:12px; }
         .body{  max-height: 500px;  width:300px; overflow: auto; box-sizing: border-box;  padding:0px 18px 10px 13px;  }
         *:before{ font-family: "微软雅黑";  text-decoration: inherit; }
@@ -28,7 +27,7 @@
         #list{ width: 270px;}
         #list ul{ padding-left: 12px; } 
         #tool{ position: relative; padding: 2px 17px 0 10px;line-height: 28px; }
-        #tool span{ color:#fff; }
+        #tool span{ cursor: pointer;}
 
         li{position: relative; cursor: pointer; }
         li>div{ line-height:28px; height:28px; overflow: hidden;   white-space: nowrap;  }
@@ -52,9 +51,9 @@
 </head>
 <body>
     <div id="tool">
-        <a class="title">OneDrive:</a>
-        <span>XXX</span> 
-        <i>[注销]</i>
+        <span class="title">OneDrive:</span>
+        <!--<span >XXX</span> -->
+        <span class="logout">[注销]</span>
         <button class="add"></button> 
     </div> 
     <div class="body"> 

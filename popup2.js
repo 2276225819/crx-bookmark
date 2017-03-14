@@ -11,11 +11,24 @@ $(function(){
 	},function(error){ 
 		alert('init error:'+error);
 		console.log(error);
-	});  
+	}); 
 	$(document) 
 	.on('click','#tool>.title',function(){
-        chrome.tabs.create({url:'https://onedrive.live.com/',selected:true}); 
+		var args = base_url.match(/folder\.(\w+)\.(\w+)\!(\w+)/);
+		var url = 'https://onedrive.live.com/?id='+args[1]+'%21'+args[3]+'&cid='+args[2];
+        chrome.tabs.create({url:url,selected:true}); 
     })
+	.on('click','#tool>.logout',function(){
+		$.each(localStorage,function(k,i){
+			delete localStorage[k];
+		});
+		$.each(document.cookie.match(/[^ =;]+(?=\=)/g),function(k,i){
+			console.log(arguments);
+		}); 
+		var url='https://login.microsoftonline.com/common/oauth2/v2.0/logout' 
+				//+'?post_logout_redirect_uri=' + 'https://www.getpostman.com/oauth2/callback'
+        chrome.tabs.create({url:url,selected:true}); 
+	})
 	.on('click','#tool>.add',function(){ 
 		if(base_url) queryNowTabAsync().then(function(tab){ 
 			$ul.html('<li>加载中...</li>')
